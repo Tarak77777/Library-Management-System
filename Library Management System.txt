@@ -1,0 +1,146 @@
+class Book:
+    def __init__(self, book_id, title, author, year):
+        self.book_id = book_id
+        self.title = title
+        self.author = author
+        self.year = year
+        self.is_borrowed = False
+        self.borrow_history = LinkedList()  # Linked list for tracking borrowers
+
+    def __repr__(self):
+        return f"Book({self.book_id}, {self.title}, {self.author}, {self.year})"
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def append(self, data):
+        new_node = Node(data)
+        if self.head is None:
+            self.head = new_node
+        else:
+            last_node = self.head
+            while last_node.next:
+                last_node = last_node.next
+            last_node.next = new_node
+
+    def display(self):
+        current = self.head
+        while current:
+            print(current.data, end=" -> ")
+            current = current.next
+        print("None")
+class TreeNode:
+    def __init__(self, book):
+        self.book = book
+        self.left = None
+        self.right = None
+
+class BookBST:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, book):
+        if not self.root:
+            self.root = TreeNode(book)
+        else:
+            self._insert(self.root, book)
+
+    def _insert(self, node, book):
+        if book.title < node.book.title:
+            if node.left:
+                self._insert(node.left, book)
+            else:
+                node.left = TreeNode(book)
+        else:
+            if node.right:
+                self._insert(node.right, book)
+            else:
+                node.right = TreeNode(book)
+
+    def search_by_title(self, title):
+        return self._search_by_title(self.root, title)
+
+    def _search_by_title(self, node, title):
+        if node is None:
+            return None
+        if node.book.title == title:
+            return node.book
+        elif title < node.book.title:
+            return self._search_by_title(node.left, title)
+        else:
+            return self._search_by_title(node.right, title)
+
+    def in_order_traversal(self, node):
+        if node:
+            self.in_order_traversal(node.left)
+            print(node.book)
+            self.in_order_traversal(node.right)
+class HashTable:
+    def __init__(self):
+        self.table = {}
+
+    def add_book(self, book):
+        self.table[book.book_id] = book
+
+    def get_book(self, book_id):
+        return self.table.get(book_id, None)
+
+    def remove_book(self, book_id):
+        if book_id in self.table:
+            del self.table[book_id]
+class Library:
+    def __init__(self):
+        self.book_bst = BookBST()  # Binary Search Tree for title-based search
+        self.book_table = HashTable()  # Hash Table for Book ID search
+
+    def add_book(self, book):
+        self.book_bst.insert(book)
+        self.book_table.add_book(book)
+
+    def search_book_by_title(self, title):
+        return self.book_bst.search_by_title(title)
+
+    def search_book_by_id(self, book_id):
+        return self.book_table.get_book(book_id)
+
+    def borrow_book(self, book_id, borrower_name):
+        book = self.search_book_by_id(book_id)
+        if book and not book.is_borrowed:
+            book.is_borrowed = True
+            book.borrow_history.append(borrower_name)
+            print(f"{borrower_name} borrowed the book: {book.title}")
+        else:
+            print(f"Book {book_id} is not available")
+
+    def return_book(self, book_id):
+        book = self.search_book_by_id(book_id)
+        if book and book.is_borrowed:
+            book.is_borrowed = False
+            print(f"The book {book.title} has been returned")
+        else:
+            print(f"Book {book_id} was not borrowed")
+
+    def display_books(self):
+        self.book_bst.in_order_traversal(self.book_bst.root)
+library = Library()
+
+book1 = Book(101, "The Catcher in the Rye", "J.D. Salinger", 1951)
+book2 = Book(102, "To Kill a Mockingbird", "Harper Lee", 1960)
+book3 = Book(103, "1984", "George Orwell", 1949)
+
+library.add_book(book1)
+library.add_book(book2)
+library.add_book(book3)
+
+library.display_books()
+
+library.borrow_book(102, "Alice")
+library.return_book(102)
+
+print("Search by title '1984':", library.search_book_by_title("1984"))
+print("Search by ID 101:", library.search_book_by_id(101))
